@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, My Love!</title>
+    <style>
+        /* General Body Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            background: #000;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1;
+        }
+
+        /* Main Content */
+        .content {
+            position: absolute;
+            text-align: center;
+            z-index: 2;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .content h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 3s infinite alternate;
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 10px #ff9a9e; }
+            100% { text-shadow: 0 0 20px #fad0c4; }
+        }
+
+        .content p {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .content button {
+            background: linear-gradient(90deg, #ff758c, #ffa758);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.5s;
+        }
+
+        .content button:hover {
+            transform: scale(1.1);
+            background: linear-gradient(90deg, #ffa758, #ff758c);
+        }
+
+        /* Fireworks Animation */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Star Effect */
+        .star {
+            position: absolute;
+            opacity: 0.7;
+            animation: twinkle 1.5s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Content -->
+    <div class="content">
+        <h1>Happy Birthday, My Love!</h1>
+        <p>You're the brightest star in my universe. Today, we celebrate you. 🌌✨</p>
+        <button onclick="revealMessage()">Open Your Surprise 🎁</button>
+    </div>
+
+    <!-- Galaxy Background -->
+    <canvas id="galaxyCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('galaxyCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const starCount = 1000;  // Total number of stars to simulate
+
+        // Function to generate stars with random shapes
+        function generateStars() {
+            for (let i = 0; i < starCount; i++) {
+                const star = {
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 1.5 + 0.5,
+                    opacity: Math.random() * 0.7 + 0.3,
+                    speed: Math.random() * 0.2 + 0.05,
+                    direction: Math.random() * 2 * Math.PI, // Random direction
+                    life: Math.random() * 1000 + 500,
+                    color: `hsl(${Math.random() * 360}, 100%, 80%)`, // Random star color
+                    shape: Math.random() < 0.5 ? 'polygon' : 'star' // Random shape: polygon or star
+                };
+                particles.push(star);
+            }
+        }
+
+        // Function to draw a star shape
+        function drawStar(x, y, size, color) {
+            const spikes = 5;
+            const outerRadius = size;
+            const innerRadius = size / 2;
+            const rotation = Math.PI / 2 * 3;
+            const step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(x, y - outerRadius);
+
+            for (let i = 0; i < spikes; i++) {
+                ctx.lineTo(x + Math.cos(rotation + i * step) * outerRadius, y + Math.sin(rotation + i * step) * outerRadius);
+                ctx.lineTo(x + Math.cos(rotation + (i + 0.5) * step) * innerRadius, y + Math.sin(rotation + (i + 0.5) * step) * innerRadius);
+            }
+
+            ctx.lineTo(x, y - outerRadius);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        // Function to draw a polygon star
+        function drawPolygon(x, y, size, color) {
+            const sides = Math.floor(Math.random() * 5) + 5; // Random number of sides (5 to 9)
+            const angle = Math.PI * 2 / sides;
+
+            ctx.beginPath();
+            for (let i = 0; i < sides; i++) {
+                let xOffset = x + size * Math.cos(i * angle);
+                let yOffset = y + size * Math.sin(i * angle);
+                ctx.lineTo(xOffset, yOffset);
+            }
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        // Function to update the galaxy and stars animation
+        function updateGalaxy() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+
+            // Loop through each star particle and update its position
+            particles.forEach((star, index) => {
+                // Move star based on speed and direction
+                star.x += Math.cos(star.direction) * star.speed;
+                star.y += Math.sin(star.direction) * star.speed;
+                star.life--;
+
+                // If the star has "lived" out, respawn it at a random position
+                if (star.life <= 0) {
+                    star.x = Math.random() * canvas.width;
+                    star.y = Math.random() * canvas.height;
+                    star.life = Math.random() * 1000 + 500;
+                }
+
+                // Draw the star with its unique shape
+                if (star.shape === 'star') {
+                    drawStar(star.x, star.y, star.size, star.color);
+                } else {
+                    drawPolygon(star.x, star.y, star.size, star.color);
+                }
+            });
+
+            requestAnimationFrame(updateGalaxy); // Continue animation
+        }
+
+        // Event listener for mouse movement to add interactivity to the galaxy
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+
+            // Create stars where the mouse moves
+            generateStarsAt(x, y);
+        });
+
+        // Function to create stars at the mouse position
+        function generateStarsAt(x, y) {
+            const star = {
+                x: x,
+                y: y,
+                size: Math.random() * 3 + 1.5,
+                opacity: Math.random() * 0.7 + 0.5,
+                speed: Math.random() * 0.3 + 0.1,
+                direction: Math.random() * 2 * Math.PI,
+                life: Math.random() * 1000 + 500,
+                color: `hsl(${Math.random() * 360}, 100%, 80%)`,
+                shape: Math.random() < 0.5 ? 'polygon' : 'star'
+            };
+            particles.push(star);
+        }
+
+        // Function to reveal the surprise message
+        function revealMessage() {
+            alert("You're the most beautiful star in my galaxy! 💖 Happy Birthday!");
+        }
+
+        // Generate the initial galaxy stars
+        generateStars();
+        updateGalaxy(); // Start the animation
+
+    </script>
+</body>
+</html>
